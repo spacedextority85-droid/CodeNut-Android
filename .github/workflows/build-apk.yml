@@ -26,3 +26,12 @@ jobs:
           name: apk
           path: "**/*.apk"
           if-no-files-found: error
+      - name: Publish APK as release asset
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          APK=$(find . -name "*.apk" | head -1)
+          if [ -z "$APK" ]; then echo "No APK found"; exit 1; fi
+          cp "$APK" app-debug.apk
+          gh release create "apk-${{ github.run_id }}" app-debug.apk --title "Build APK #${{ github.run_id }}" --notes "Debug APK artifact"
